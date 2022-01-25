@@ -8,7 +8,7 @@ Very simple four-in-a-row (or connect4) in python. For educative purpose.
 - display grid with emoji in console
 - winner verification
 - playable with 2 or against an AI
-- AI (**MinMax** with depth of 2 or 4)
+- AI (**MinMax**)
 - save game in file
 
 ### Statement
