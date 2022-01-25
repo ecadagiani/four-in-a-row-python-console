@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-nbCol = 7
-nbRow = 6
-gridIcons = {'player1': '🟡', 'player2': '🔴', 'empty': '⚪️'}
-playerName = {1: 'jaune', 2: 'rouge'}
+NB_COLUMN = 7
+NB_ROW = 6
+GRID_ICONS = {'player1': '🟡', 'player2': '🔴', 'empty': '⚪️'}
+PLAYER_NAME = {1: 'jaune', 2: 'rouge'}

@@ -3,7 +3,9 @@ import os
 import datetime
 import json
 import grid
-from constants import playerName, nbCol, nbRow
+import save
+import ia
+from constants import PLAYER_NAME, NB_COLUMN, NB_ROW
 
 
 nbPlayer = int()
@@ -14,6 +16,7 @@ def start():
     global nbPlayer
     global iaLevel
     grid.initGrid()
+    save.initSave()
     nbPlayer = askNbPlayer()
     if nbPlayer == 1:
         iaLevel = askIaLevel()
@@ -28,32 +31,34 @@ def run():
         columnIndex = int()
 
         # ask column to human player
-        print(f'[JOUEUR { playerName[playerTurn] }] - À votre tour ')
+        print(f'[JOUEUR { PLAYER_NAME[playerTurn] }] - À votre tour ')
         columnIndex = askColumn()
         # Envoie du jeton
         grid.addToken(columnIndex, playerTurn)
 
         # IA play
         if(nbPlayer == 1):
-            print('ia turn')
+            columnIndex = ia.getIaColumnIndex(iaLevel)
+            grid.addToken(columnIndex, 2)
 
-        # todo: save
+        save.saveTurn(playerTurn, columnIndex)
 
         if playerTurn == 1 and nbPlayer == 2:
             playerTurn = 2
         else:
             playerTurn = 1
 
-        winner = getWinner(grid.cells)
-        isGameOver = winner != -1
+        winner = grid.checkWinner(grid.cells)
+        isGameOver = winner != 0
 
     grid.printGrid()
-    if winner == 0:
+    if winner == -1:
         print('\n\n Egalité. Merci d\'avoir joué')
     elif winner == 1 or (winner == 2 and nbPlayer == 2):
-        print(f'\n\n Bravo joueur {playerName[winner] } tu as gagné!')
+        print(f'\n\n Bravo joueur {PLAYER_NAME[winner] } tu as gagné!')
     elif winner == 2 and nbPlayer == 1:
         print(f'\n\n Perdu l\'IA a gagné!')
+    save.saveWin(winner, nbPlayer == 1)
 
 
 def askNbPlayer():
@@ -87,52 +92,13 @@ def askColumn():
     try:
         userResponse = input("Choisissez une colonne où jouer: ")
         columnIndex = int(userResponse) - 1
-        if not (0 <= columnIndex < nbCol):
+        if not (0 <= columnIndex < NB_COLUMN):
             raise(ValueError())
         if grid.getFirstEmptyRowInColumn(columnIndex) < 0:
             raise(ValueError())
         return columnIndex
     except ValueError:
         print(
-            f'\nErreur - Vous devez choisir une colonne vide entre 1 et {nbCol}\n'
+            f'\nErreur - Vous devez choisir une colonne vide entre 1 et {NB_COLUMN}\n'
         )
         return askColumn()
-
-
-# get the winner.
-# return 1 if player 1 win
-# return 2 if player 2 win
-# return 0 if the game is full with no winner
-# return -1 if the game is not full no winner
-def getWinner(cells):
-    # Horizontal
-    for j in range(0, nbRow):
-        for i in range(3, nbCol):
-            if (cells[j][i] == cells[j][i-1] ==
-                    cells[j][i-2] == cells[j][i-3] != 0):
-                return cells[j][i]
-            else:
-                continue
-    # Vertical
-    for i in range(0, nbCol):
-        for j in range(3, nbRow):
-            if (cells[j][i] == cells[j-1][i] ==
-                    cells[j-2][i] == cells[j-3][i] != 0):
-                return cells[j][i]
-            else:
-                continue
-    # Diagonal
-    for i in range(0, 4):
-        for j in range(0, 3):
-            if (cells[j][i] == cells[j+1][i+1] ==
-                    cells[j+2][i+2] == cells[j+3][i+3] != 0):
-                return cells[j][i]
-            elif(cells[j+3][i] == cells[j+2][i+1] ==
-                    cells[j+1][i+2] == cells[j][i+3] != 0):
-                return cells[j+3][i]
-            else:
-                continue
-
-    if grid.isGridIsFull():
-        return 0
-    return -1
