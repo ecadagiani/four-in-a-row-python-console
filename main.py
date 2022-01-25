@@ -3,7 +3,7 @@ import game
 
 
 def main():
-    while True:
+    while True:  # loop until user say no to replay
         game.start()
         winner = game.run()
         replay = input("\nVoulez vous rejouer ? (Y/n) ")

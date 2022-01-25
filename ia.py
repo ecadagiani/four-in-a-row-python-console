@@ -11,6 +11,14 @@ HUMAN_PLAYER_ID = 1
 
 
 def getIaColumnIndex(iaLevel):
+    """get column index of the IA play
+
+    Args:
+        iaLevel (number): level of ia 1-3
+
+    Returns:
+        number: column index
+    """
     if iaLevel == 1:
         return randomIA()
     if iaLevel == 2:
@@ -20,10 +28,76 @@ def getIaColumnIndex(iaLevel):
 
 
 def randomIA():
+    """get an random empty column
+
+    Returns:
+        number: column index 0-6
+    """
     columnIndex = randint(0, NB_COLUMN-1)
     if grid.getFirstEmptyRowInColumn(columnIndex) < 0:
         return randomIA()
     return columnIndex
+
+
+def bestMove(_cells, searchDepth):
+    """ Method that executes the first call of the minimax method and
+        returns the move to be executed by the computer. It also verifies
+        if any immediate wins or loses are present.
+
+    Args:
+        _cells (list<list<number>>): cells of the game
+        searchDepth (number): depth of the min-max search
+
+    Returns:
+        number: column index 0-6
+    """
+    cells = deepcopy(_cells)
+    for i in range(0, NB_COLUMN):
+        # If moves cannot be made on column, skip it
+        if cells[0][i] != 0:
+            continue
+
+        currentMove = [0, i]
+
+        for j in range(0, NB_ROW - 1):
+            if cells[j + 1][i] != 0:
+                cells[j][i] = IA_PLAYER_ID
+                currentMove[0] = j
+                break
+            elif j == NB_ROW - 2:
+                cells[j+1][i] = IA_PLAYER_ID
+                currentMove[0] = j+1
+
+        winner = grid.checkWinner(cells)
+        cells[currentMove[0]][currentMove[1]] = 0
+
+        if winner == IA_PLAYER_ID:
+            return currentMove[1]
+
+    for i in range(0, NB_COLUMN):
+        # If moves cannot be made on column, skip it
+        if cells[0][i] != 0:
+            continue
+
+        currentMove = [0, i]
+
+        for j in range(0, NB_ROW - 1):
+            if cells[j + 1][i] != 0:
+                cells[j][i] = HUMAN_PLAYER_ID
+                currentMove[0] = j
+                break
+            elif j == NB_ROW - 2:
+                cells[j+1][i] = HUMAN_PLAYER_ID
+                currentMove[0] = j+1
+
+        winner = grid.checkWinner(cells)
+        cells[currentMove[0]][currentMove[1]] = 0
+
+        if winner == HUMAN_PLAYER_ID:
+            return currentMove[1]
+
+    move, score = minimax(cells, searchDepth)
+    return move[1]
 
 
 def minimax(cells, depth):
@@ -66,15 +140,18 @@ def minimax(cells, depth):
 
     return bestMove, bestScore
 
-#
-# Method that calculates the heuristic value of a given
-# board state. The heuristic adds a point to a player
-# for each empty slot that could grant a player victory.
-#
-
 
 def evaluateScore(cells):
-    # Return infinity if a player has won in the given board
+    """ Method that calculates the heuristic value of a given
+        board state. The heuristic adds a point to a player
+        for each empty slot that could grant a player victory.
+
+    Args:
+        cells (list<list<number>>): cells of the game
+
+    Returns:
+        number: potential of win score. infinity+ on IA win, infinity- on player win
+    """
     score = grid.checkWinner(cells)
 
     if score == IA_PLAYER_ID:
@@ -91,14 +168,20 @@ def evaluateScore(cells):
 
     return score
 
-#
-# Method that evaluates if a given coordinate has a possible win
-# for any player. Each coordinate evaluates if a possible win can be
-# found vertically, horizontally or in both diagonals.
-#
-
 
 def scoreOfCoordinate(cells, i, j):
+    """ Method that evaluates if a given coordinate has a possible win
+        for any player. Each coordinate evaluates if a possible win can be
+        found vertically, horizontally or in both diagonals.
+
+    Args:
+        cells (list<list<number>>): cells of the game
+        i (number): row index 
+        j (number): column index
+
+    Returns:
+        number: score of the coordinate
+    """
     score = 0
 
     # Check vertical line
@@ -155,11 +238,6 @@ def scoreOfCoordinate(cells, i, j):
 
     return score
 
-#
-# Method that searches through a line (vertical, horizontal or
-# diagonal) to get the heuristic value of the given coordinate.
-#
-
 
 def scoreOfLine(
     cells,
@@ -172,6 +250,23 @@ def scoreOfLine(
     firstColumnCondition,
     secondColumnCondition,
 ):
+    """ Method that searches through a line (vertical, horizontal or
+        diagonal) to get the heuristic value of the given coordinate.
+
+    Args:
+        cells (list<list<number>>): cells of the game
+        i (number): row index
+        j (number): column index
+        rowIncrement (number): number to add to i (+1 / -1)
+        columnIncrement (number): number to add to j (+1 / -1)
+        firstRowCondition (number): condition to stop loop on row increment
+        secondRowCondition (number): condition to stop loop on row increment for the second side
+        firstColumnCondition (number): condition to stop loop on column increment
+        secondColumnCondition (number): condition to stop loop on column increment for the second side
+
+    Returns:
+        number: score of the line
+    """
     score = 0
     currentInLine = 0
     valsInARow = 0
@@ -236,59 +331,3 @@ def scoreOfLine(
         score -= 1
 
     return score
-
-#
-# Method that executes the first call of the minimax method and
-# returns the move to be executed by the computer. It also verifies
-# if any immediate wins or loses are present.
-#
-
-
-def bestMove(_cells, searchDepth):
-    cells = deepcopy(_cells)
-    for i in range(0, NB_COLUMN):
-        # If moves cannot be made on column, skip it
-        if cells[0][i] != 0:
-            continue
-
-        currentMove = [0, i]
-
-        for j in range(0, NB_ROW - 1):
-            if cells[j + 1][i] != 0:
-                cells[j][i] = IA_PLAYER_ID
-                currentMove[0] = j
-                break
-            elif j == NB_ROW - 2:
-                cells[j+1][i] = IA_PLAYER_ID
-                currentMove[0] = j+1
-
-        winner = grid.checkWinner(cells)
-        cells[currentMove[0]][currentMove[1]] = 0
-
-        if winner == IA_PLAYER_ID:
-            return currentMove[1]
-
-    for i in range(0, NB_COLUMN):
-        # If moves cannot be made on column, skip it
-        if cells[0][i] != 0:
-            continue
-
-        currentMove = [0, i]
-
-        for j in range(0, NB_ROW - 1):
-            if cells[j + 1][i] != 0:
-                cells[j][i] = HUMAN_PLAYER_ID
-                currentMove[0] = j
-                break
-            elif j == NB_ROW - 2:
-                cells[j+1][i] = HUMAN_PLAYER_ID
-                currentMove[0] = j+1
-
-        winner = grid.checkWinner(cells)
-        cells[currentMove[0]][currentMove[1]] = 0
-
-        if winner == HUMAN_PLAYER_ID:
-            return currentMove[1]
-
-    move, score = minimax(cells, searchDepth)
-    return move[1]

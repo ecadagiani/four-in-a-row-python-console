@@ -5,11 +5,21 @@ cells = []
 
 
 def initGrid():
+    """initialise cells to empty
+    """
     global cells
     cells = [[0 for i in range(NB_COLUMN)] for j in range(NB_ROW)]
 
 
 def gridToStr(grid):
+    """transform cells array into an beautiful string
+
+    Args:
+        grid (list<list<number>>): array of cells
+
+    Returns:
+        string: beautiful string representing the table
+    """
     gridStr = ''
 
     # add headers
@@ -31,11 +41,20 @@ def gridToStr(grid):
 
 
 def printGrid():
+    """directly print table in console
+    """
     print(gridToStr(cells))
 
 
-# Give the first empty row for a column
 def getFirstEmptyRowInColumn(column):
+    """Give the first empty row for a column
+
+    Args:
+        column (index): column index 0-6
+
+    Returns:
+        number: index of first empty row. -1 if column is full.
+    """
     # run trought all row, in reverse (start at last row)
     for indexRow, row in reversed(list(enumerate(cells))):
         # check if the cell from the tested row, and the past column is free
@@ -44,8 +63,16 @@ def getFirstEmptyRowInColumn(column):
     return -1
 
 
-# add token to the grid
 def addToken(column, player):
+    """add token to the grid
+
+    Args:
+        column (number): column index 0-6
+        player (number): player id 1-2
+
+    Raises:
+        ValueError: if the column is full
+    """
     global cells
     row = getFirstEmptyRowInColumn(column)
     if(row < 0):
@@ -55,18 +82,26 @@ def addToken(column, player):
 
 
 def isGridIsFull():
+    """check if grid is full of token
+
+    Returns:
+        bool: True if the grid is full
+    """
     for indexRow, row in enumerate(cells):
         if 0 in row:
             return False
     return True
 
 
-# get the winner.
-# return 1 if player 1 win
-# return 2 if player 2 win
-# return 0 if the game is full with no winner
-# return -1 if the game is not full no winner
 def checkWinner(cells):
+    """ get the winner of the party
+
+    Args:
+        cells (list<list<number>>): list of cells
+
+    Returns:
+        number: get the id of the winner. 1: player1 win, 2: player2 win, 0: equality, -1: game is not over
+    """
     # Horizontal
     for j in range(0, NB_ROW):
         for i in range(3, NB_COLUMN):
@@ -94,7 +129,7 @@ def checkWinner(cells):
                 return cells[j+3][i]
             else:
                 continue
-
+    # check after winner, because if the game have a winner on the last token, we can detect it
     if isGridIsFull():
         return -1
     return 0
